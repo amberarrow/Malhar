@@ -16,12 +16,18 @@
 
 package com.datatorrent.lib.io.fs;
 
+import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.zip.GZIPOutputStream;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherOutputStream;
+
+import org.anarres.lzo.LzoAlgorithm;
+import org.anarres.lzo.LzoConstraint;
+import org.anarres.lzo.LzoLibrary;
+import org.anarres.lzo.LzopOutputStream;
 
 /**
  * Filters for compression and encryption.
@@ -37,11 +43,41 @@ public class FilterStreamCodec
     {
       filterStream = new GZIPOutputStream(outputStream);
     }
-    
+
     @Override
     public void finalizeContext() throws IOException
     {
       filterStream.finish();
+    }
+  }
+
+  public static class LZOFilterStreamContext implements FilterStreamContext<LZOpoutputStream>
+  {
+    private LZOpoutputStream outputStream;
+
+    public LZOFilterStreamContext(OutputStream outputStream) throws IOException
+    {
+      this.outputStream = new LZOpoutputStream(new LzopOutputStream(outputStream, LzoLibrary.getInstance().newCompressor(LzoAlgorithm.LZO1X, LzoConstraint.COMPRESSION)));
+    }
+
+    @Override
+    public LZOpoutputStream getFilterStream()
+    {
+      return outputStream;
+    }
+
+    @Override
+    public void finalizeContext() throws IOException
+    {
+      outputStream.flush();
+    }
+  }
+
+  static class LZOpoutputStream extends FilterOutputStream
+  {
+    public LZOpoutputStream(OutputStream outputStream)
+    {
+      super(outputStream);
     }
   }
 
@@ -64,6 +100,24 @@ public class FilterStreamCodec
   }
 
   /**
+   * A provider for LZO filter
+   */
+  public static class LZOFilterStreamProvider implements FilterStreamProvider<LZOpoutputStream, OutputStream>
+  {
+    @Override
+    public FilterStreamContext<LZOpoutputStream> getFilterStreamContext(OutputStream outputStream) throws IOException
+    {
+      return new LZOFilterStreamContext(outputStream);
+    }
+
+    @Override
+    public void reclaimFilterStreamContext(FilterStreamContext<LZOpoutputStream> filterStreamContext)
+    {
+
+    }
+  }
+
+  /**
    * This filter should be used when cipher cannot be reused for example when writing to different output streams
    */
   public static class CipherFilterStreamContext extends FilterStreamContext.BaseFilterStreamContext<CipherOutputStream>
@@ -75,7 +129,7 @@ public class FilterStreamCodec
   }
 
   /**
-   * This provider is useful when writing to a single output stream so that the same cipher can be reused 
+   * This provider is useful when writing to a single output stream so that the same cipher can be reused
    */
   public static class CipherSimpleStreamProvider implements FilterStreamProvider<CipherOutputStream, OutputStream>
   {

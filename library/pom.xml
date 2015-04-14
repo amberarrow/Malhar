@@ -320,6 +320,11 @@
         </exclusion>
       </exclusions>
     </dependency>
+    <dependency>
+	  <groupId>org.anarres.lzo</groupId>
+	  <artifactId>lzo-core</artifactId>
+	  <version>1.0.4</version>
+	</dependency>
   </dependencies>
 
   <profiles>

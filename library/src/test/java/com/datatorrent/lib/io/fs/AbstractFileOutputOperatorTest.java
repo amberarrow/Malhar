@@ -34,7 +34,8 @@ import org.junit.Test;
 import org.junit.runner.Description;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
+import org.anarres.lzo.LzoInputStream;
+import org.anarres.lzo.LzopInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.mutable.MutableLong;
 import org.apache.commons.lang3.mutable.MutableInt;
@@ -44,11 +45,9 @@ import org.apache.hadoop.fs.FileSystem;
 import com.datatorrent.lib.helper.OperatorContextTestHelper;
 import com.datatorrent.lib.testbench.RandomWordGenerator;
 import com.datatorrent.lib.util.TestUtils.TestInfo;
-
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.LocalMode;
 import com.datatorrent.api.StreamingApplication;
-
 import com.datatorrent.common.util.DTThrowable;
 
 public class AbstractFileOutputOperatorTest
@@ -1651,7 +1650,43 @@ public class AbstractFileOutputOperatorTest
     Assert.assertEquals("Part file names", fileNames, getFileNames(files));
     writer.teardown();
   }
-  
+
+  class FileOutputOperator extends AbstractFileOutputOperator<String>
+  {
+    static final String OUTPUT_FILENAME = "compressedData.txt.lzo";
+
+    @Override
+    protected String getFileName(String tuple)
+    {
+      return OUTPUT_FILENAME;
+    }
+
+    @Override
+    protected byte[] getBytesForTuple(String tuple)
+    {
+      return tuple.getBytes();
+    }
+  }
+
+  @Test
+  public void testLZOCompression() throws IOException
+  {
+    FileOutputOperator writer = new FileOutputOperator();
+    writer.setFilterStreamProvider(new FilterStreamCodec.LZOFilterStreamProvider());
+
+    File dir = new File(testMeta.getDir());
+    writer.setFilePath(testMeta.getDir());
+    writer.setup(testOperatorContext);
+
+    writer.beginWindow(0);
+    for (int j = 0; j < 10; ++j) {
+      writer.input.put(Integer.toString(j));
+    }
+    writer.endWindow();
+    writer.teardown();
+
+  }
+
   @Test
   public void testCompression() throws IOException
   {
