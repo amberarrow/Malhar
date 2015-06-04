@@ -66,6 +66,9 @@ public abstract class AbstractSinglePortZeroMQOutputOperator<T> extends Abstract
     @Override
     public void process(T tuple)
     {
+    	if (!syncStarted) {
+	        startSyncJob();
+	      }
       processTuple(tuple); // This is an abstract call
     }
   };

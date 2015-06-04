@@ -113,6 +113,7 @@ public abstract class AbstractBaseZeroMQOutputOperator extends BaseOperator
   public void teardown()
   {
     publisher.close();
-    context.term();
+    syncservice.close();
+    context.term();    
   }
 }

@@ -138,16 +138,17 @@ public void activate(OperatorContext ctx)
       {
         running = true;
         while (running) {
-          try {
-            byte[] message = subscriber.recv(0);
-            if (message != null) {
-              holdingBuffer.add(message);
-            }
-          }
-          catch (Exception e) {
-//        logger.debug(e.toString());
-            break;
-          }
+        	try {
+        		byte[] message = subscriber.recv(ZMQ.NOBLOCK);
+        		if (message != null) {
+        			holdingBuffer.add(message);
+        		}
+        		sleep(5);
+        	}
+        	catch (Exception e) {
+        		logger.debug(e.toString());
+        		break;
+        	}
         }
       }
     }.start();
