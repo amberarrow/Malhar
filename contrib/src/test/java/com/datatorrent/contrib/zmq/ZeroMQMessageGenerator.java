@@ -13,13 +13,13 @@ class ZeroMQMessageGenerator {
 
   String pubAddr = "tcp://*:5556";
   String syncAddr = "tcp://*:5557";
-  
+
   private static Logger logger;
   public ZeroMQMessageGenerator(Logger loggerInstance)
   {
-	  logger = loggerInstance;
+    logger = loggerInstance;
   }
-  
+
   public void setup()
   {
     context = ZMQ.context(1);

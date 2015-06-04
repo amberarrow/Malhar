@@ -26,7 +26,7 @@ public class ZeroMQInputOperatorBenchmark extends ZeroMQInputOperatorTest
 {
   @Test
   public void testDag() throws InterruptedException, Exception {
-      final int testNum = 2000000;
-      testHelper(testNum);
+    final int testNum = 2000000;
+    testHelper(testNum);
   }
 }

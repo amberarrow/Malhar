@@ -17,11 +17,14 @@ package com.datatorrent.contrib.zmq;
 
 
 import java.util.Map;
-import org.junit.*;
+
+import org.junit.Assert;
+import org.junit.Test;
 import org.slf4j.LoggerFactory;
 
-import com.datatorrent.api.*;
+import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
+import com.datatorrent.api.LocalMode;
 
 
 /**

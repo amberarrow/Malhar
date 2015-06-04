@@ -15,19 +15,15 @@
  */
 package com.datatorrent.contrib.zmq;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.ArrayBlockingQueue;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.slf4j.LoggerFactory;
-import org.zeromq.ZMQ;
 
-import com.datatorrent.api.*;
-import com.datatorrent.api.Context.OperatorContext;
+import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
-import com.datatorrent.api.Operator.ActivationListener;
+import com.datatorrent.api.LocalMode;
 
 /**
  *
@@ -102,3 +98,4 @@ public class ZeroMQOutputOperatorBenchmark
     logger.debug("end of test");
   }
 }
+
