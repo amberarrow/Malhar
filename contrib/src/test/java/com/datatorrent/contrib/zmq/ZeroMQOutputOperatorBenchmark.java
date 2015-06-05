@@ -24,75 +24,21 @@ import org.slf4j.LoggerFactory;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
 import com.datatorrent.api.LocalMode;
+import com.datatorrent.contrib.testhelper.SourceModule;
 
 /**
  *
  */
-public class ZeroMQOutputOperatorBenchmark
+public class ZeroMQOutputOperatorBenchmark extends ZeroMQOutputOperatorTest
 {
-  private static org.slf4j.Logger logger = LoggerFactory.getLogger(ZeroMQOutputOperatorTest.class);
-
   @Test
   public void testDag() throws Exception
   {
     final int testNum = 2000000;
 
-    LocalMode lma = LocalMode.newInstance();
-    DAG dag = lma.getDAG();
-    SourceModuleForTest source = dag.addOperator("source", new SourceModuleForTest());
-    source.setTestNum(testNum);
-    final ZeroMQOutputOperator collector = dag.addOperator("generator", new ZeroMQOutputOperator());
-    collector.setUrl("tcp://*:5556");
-    collector.setSyncUrl("tcp://*:5557");
-    collector.setSUBSCRIBERS_EXPECTED(1);
+    logger = LoggerFactory.getLogger(ZeroMQOutputOperatorTest.class);
 
-    dag.addStream("Stream", source.outPort, collector.inputPort).setLocality(Locality.CONTAINER_LOCAL);
-
-    final LocalMode.Controller lc = lma.getController();
-    lc.setHeartbeatMonitoringEnabled(false);
-
-    final ZeroMQMessageReceiver receiver = new ZeroMQMessageReceiver(logger);
-    receiver.setup();
-    new Thread(receiver).start();
-
-    new Thread("LocalClusterController")
-    {
-      @Override
-      public void run()
-      {
-        try {
-          Thread.sleep(1000);
-          while (true) {
-            if (receiver.count < testNum * 3) {
-              Thread.sleep(10);
-            }
-            else {
-              break;
-            }
-          }
-        }
-        catch (InterruptedException ex) {
-        }
-        lc.shutdown();
-      }
-    }.start();
-
-    lc.run();
-
-    Assert.assertEquals("emitted value for testNum was ", testNum * 3, receiver.count);
-    for (Map.Entry<String, Integer> e : receiver.dataMap.entrySet()) {
-      if (e.getKey().equals("a")) {
-        Assert.assertEquals("emitted value for 'a' was ", new Integer(2), e.getValue());
-      }
-      else if (e.getKey().equals("b")) {
-        Assert.assertEquals("emitted value for 'b' was ", new Integer(20), e.getValue());
-      }
-      else if (e.getKey().equals("c")) {
-        Assert.assertEquals("emitted value for 'c' was ", new Integer(1000), e.getValue());
-      }
-    }
-    
-    receiver.teardown();
+    runTest(testNum);
     
     logger.debug(String.format("\nBenchmarked %d tuples", testNum * 3));
     logger.debug("end of test");

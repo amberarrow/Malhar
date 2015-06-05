@@ -1,9 +1,12 @@
 package com.datatorrent.contrib.zmq;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.zeromq.ZMQ;
+
+import com.datatorrent.contrib.testhelper.MessageQueueTestHelper;
 
 class ZeroMQMessageGenerator {
   private ZMQ.Context context;
@@ -32,8 +35,7 @@ class ZeroMQMessageGenerator {
 
   public void send(Object message)
   {
-    String msg = message.toString();
-    // logger.debug("publish:"+msg);
+    String msg = message.toString();   
     publisher.send(msg.getBytes(), 0);
   }
 
@@ -50,17 +52,12 @@ class ZeroMQMessageGenerator {
       syncservice.send("".getBytes(), 0);
     }
     for (int i = 0; i < msgCount; i++) {
-      HashMap<String, Integer> dataMapa = new HashMap<String, Integer>();
-      dataMapa.put("a", 2);
-      send(dataMapa);
 
-      HashMap<String, Integer> dataMapb = new HashMap<String, Integer>();
-      dataMapb.put("b", 20);
-      send(dataMapb);
-
-      HashMap<String, Integer> dataMapc = new HashMap<String, Integer>();
-      dataMapc.put("c", 1000);
-      send(dataMapc);
+      ArrayList<HashMap<String, Integer>>  dataMaps = MessageQueueTestHelper.getMessages();
+      for(int j =0; j < dataMaps.size(); j++)
+      {
+        send(dataMaps.get(j));  
+      }     
     }
   }
 }

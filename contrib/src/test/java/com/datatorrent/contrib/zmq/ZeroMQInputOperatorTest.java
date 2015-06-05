@@ -27,13 +27,15 @@ import org.slf4j.LoggerFactory;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
 import com.datatorrent.api.LocalMode;
+import com.datatorrent.contrib.testhelper.MessageQueueTestHelper;
+import com.datatorrent.contrib.testhelper.CollectorModule;
 
 /**
  *
  */
 public class ZeroMQInputOperatorTest
 {
-  private static Logger logger = LoggerFactory.getLogger(ZeroMQInputOperatorTest.class);
+  protected static Logger logger = LoggerFactory.getLogger(ZeroMQInputOperatorTest.class);
   
   @Test
   public void testDag() throws InterruptedException, Exception {
@@ -112,27 +114,8 @@ public class ZeroMQInputOperatorTest
 	  
 	 // logger.debug("collection size:"+collector.inputPort.collections.size()+" "+collector.inputPort.collections.toString());
 
-	  validateResults(testNum, collector.inputPort.collections);
+	  MessageQueueTestHelper.validateResults(testNum, collector.inputPort.collections);
 	  logger.debug("end of test");
   }
-  public void validateResults(int testNum, HashMap<String, List<?>> collections )
-  {
-	    ArrayList<byte[]> byteList =(ArrayList<byte[]>) collections.get("collector");
-	    Assert.assertEquals("emitted value for testNum was ", testNum * 3, byteList.size());
-	    for (int i = 0; i < byteList.size(); i++) {
-	      String str = new String(byteList.get(i));
-	      int eq = str.indexOf('=');
-	      String key = str.substring(1, eq);
-	      Integer value = Integer.parseInt(str.substring(eq + 1, str.length() - 1));
-	      if (key.equals("a")) {
-	        Assert.assertEquals("emitted value for 'a' was ", new Integer(2), value);
-	      }
-	      else if (key.equals("b")) {
-	        Assert.assertEquals("emitted value for 'b' was ", new Integer(20), value);
-	      }
-	      if (key.equals("c")) {
-	        Assert.assertEquals("emitted value for 'c' was ", new Integer(1000), value);
-	      }
-	    }
-  }
+  
 }

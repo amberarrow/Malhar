@@ -25,6 +25,7 @@ import org.slf4j.LoggerFactory;
 import com.datatorrent.api.DAG;
 import com.datatorrent.api.DAG.Locality;
 import com.datatorrent.api.LocalMode;
+import com.datatorrent.contrib.testhelper.SourceModule;
 
 
 /**
@@ -32,16 +33,22 @@ import com.datatorrent.api.LocalMode;
  */
 public class ZeroMQOutputOperatorTest
 {
-  private static org.slf4j.Logger logger = LoggerFactory.getLogger(ZeroMQOutputOperatorTest.class);
+  protected static org.slf4j.Logger logger = LoggerFactory.getLogger(ZeroMQOutputOperatorTest.class);
 
   @Test
   public void testDag() throws Exception
   {
     final int testNum = 3;
 
+    runTest(testNum);
+    
+    logger.debug("end of test");
+  }
+
+  protected void runTest(final int testNum) {
     LocalMode lma = LocalMode.newInstance();
     DAG dag = lma.getDAG();
-    SourceModuleForTest source = dag.addOperator("source", new SourceModuleForTest());
+    SourceModule source = dag.addOperator("source", new SourceModule());
     source.setTestNum(testNum);
     final ZeroMQOutputOperator collector = dag.addOperator("generator", new ZeroMQOutputOperator());
     collector.setUrl("tcp://*:5556");
@@ -104,7 +111,5 @@ public class ZeroMQOutputOperatorTest
         Assert.assertEquals("emitted value for 'c' was ", new Integer(1000), e.getValue());
       }
     }
-    
-    logger.debug("end of test");
   }
 }
